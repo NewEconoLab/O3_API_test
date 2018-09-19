@@ -15,6 +15,9 @@ class App extends React.Component {
     o3.init(_ => this.callbackHandler2())
   }
   callbackHandler2(response) {
+    console.log("response :" + response);
+    Toast.info('response:' + JSON.stringify(response),5);
+
     if (response == null) {
       this.setState({ loading: false, disabled: false })
       Toast.info('需要在O3钱包中操作', 1.5)
@@ -34,6 +37,7 @@ class App extends React.Component {
    * @methods 转账
    */
   handleSubmit = e => {
+    Toast.info("This is Toast!",1.5);
     this.setState({ loading: true, disabled: true })
     this.gettransfertxhex(
       this.state.addrFrom,
