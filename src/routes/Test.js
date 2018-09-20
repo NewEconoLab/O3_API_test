@@ -8,11 +8,14 @@ class App extends React.Component {
     addrFrom: '',
     addrTo: 'AeaWf2v7MHGpzxH4TtBAu5kJRp5mRq2DQG',
     number: '0.01',
+    pk: '',
+    txHex: '',
+    sign: '',
     loading: false,
     disabled: false
   }
-  componentWillMount() {
-    o3.init(_ => this.callbackHandler2())
+  componentDidMount() {
+    o3.init(response => this.callbackHandler2(response))
   }
   callbackHandler2(response) {
     if (response == null) {
@@ -25,11 +28,40 @@ class App extends React.Component {
         o3.getAccounts()
       } else if (response.command === 'getAccounts') {
         this.setState({
-          addrFrom: response.data.accounts[0].neo.address
+          addrFrom: response.data.accounts[0].neo.address,
+          pk: response.data.accounts[0].neo.publicKey
         })
+      } else if (response.command === 'requestToSign') {
+        if (!response.data) {
+          return false
+        }
+        this.setState(
+          {
+            sign: response.data.signatureData
+          },
+          _ => {
+            let { txHex, sign, pk } = this.state
+            this.sendtxplussign(txHex, sign, pk)
+          }
+        )
       }
     }
   }
+  sendtxplussign = (txHex, sign, pk) => {
+    let api = 'https://api.nel.group/api/testnet'
+    let postdata = this.makeRpcPostBody('sendtxplussign', txHex, sign, pk)
+    fetch(api, {
+      method: 'post',
+      body: JSON.stringify(postdata)
+    }).then(result => {
+      result.json().then(r => {
+        this.setState({
+          TXID: JSON.stringify(r)
+        })
+      })
+    })
+  }
+
   /**
    * @methods 转账
    */
@@ -43,20 +75,20 @@ class App extends React.Component {
     )
   }
   makeRpcPostBody = (method, ..._params) => {
-    var body = {}
+    let body = {}
     body['jsonrpc'] = '2.0'
     body['id'] = 1
     body['method'] = method
-    var params = []
-    for (var i = 0; i < _params.length; i++) {
+    let params = []
+    for (let i = 0; i < _params.length; i++) {
       params.push(_params[i])
     }
     body['params'] = params
     return body
   }
   gettransfertxhex = (from, to, assetID, amount) => {
-    var api = 'https://api.nel.group/api/testnet'
-    var postdata = this.makeRpcPostBody(
+    let api = 'https://api.nel.group/api/testnet'
+    let postdata = this.makeRpcPostBody(
       'gettransfertxhex',
       from,
       to,
@@ -68,6 +100,9 @@ class App extends React.Component {
       body: JSON.stringify(postdata)
     }).then(result => {
       result.json().then(r => {
+        this.setState({
+          txHex: r.result[0].transfertxhex
+        })
         this.requestToSignRawTransaction(r.result[0].transfertxhex)
       })
     })
@@ -125,7 +160,20 @@ class App extends React.Component {
           >
             转账数量
           </InputItem>
+          {['txHex', 'sign', 'TXID'].map(key => {
+            return (
+              <InputItem
+                value={this.state[key]}
+                id="addrFrom"
+                editable={false}
+                placeholder={key}
+              >
+                {key}
+              </InputItem>
+            )
+          })}
         </List>
+
         <WingBlank style={{ marginTop: '15px' }}>
           <Button
             loading={this.state.loading}
@@ -133,7 +181,7 @@ class App extends React.Component {
             onClick={this.handleSubmit}
             type="primary"
           >
-            点击转账
+            {this.state.loading ? '转账中' : '点击转账'}
           </Button>
         </WingBlank>
       </div>
