@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'dva'
 import fetch from 'dva/fetch'
-import { List, InputItem, WingBlank, Button, Toast } from 'antd-mobile'
+import { List, InputItem, TextareaItem, WingBlank, Button, Toast } from 'antd-mobile'
 import o3 from '../utils/o3'
 class App extends React.Component {
   state = {
@@ -19,7 +19,7 @@ class App extends React.Component {
   }
   callbackHandler2(response) {
     console.log("response :" + response);
-    Toast.info('response:' + JSON.stringify(response),5);
+    //Toast.info('response:' + JSON.stringify(response),5);
 
     if (response == null) {
       this.setState({ loading: false, disabled: false })
@@ -137,23 +137,23 @@ class App extends React.Component {
     return (
       <div>
         <List renderHeader={() => '转账测试'}>
-          <InputItem
+          <TextareaItem
+            title="钱包地址"
+            rows={2}
             value={this.state.addrFrom}
             id="addrFrom"
             editable={false}
             placeholder="您的钱包地址"
-          >
-            钱包地址
-          </InputItem>
-          <InputItem
+          />
+          <TextareaItem
+            title="钱包地址"
+            rows={2}
             value={this.state.addrTo}
             onChange={val => this.addrToChange(val)}
             id="addrTo"
             clear
             placeholder="请输入转出地址"
-          >
-            转出地址
-          </InputItem>
+          />
           <InputItem
             value={this.state.number}
             onChange={val => this.numberChange(val)}
@@ -164,21 +164,24 @@ class App extends React.Component {
           >
             转账数量
           </InputItem>
-          {['txHex', 'sign', 'TXID'].map(key => {
-            return (
-              <InputItem
-                value={this.state[key]}
-                id="addrFrom"
-                editable={false}
-                placeholder={key}
-              >
-                {key}
-              </InputItem>
-            )
-          })}
-        </List>
-
-        <WingBlank style={{ marginTop: '15px' }}>
+          {/* <TextareaItem
+            title="交易"
+            rows={5}
+            value={this.state.txHex}
+            editable={false}
+            id="txHex"
+            clear
+            placeholder="这里显示交易二进制码"
+          />
+          <TextareaItem
+              title="签名"
+              rows={5}
+              value={this.state.sign}
+              editable={false}
+              id="sign"
+              clear
+              placeholder="这里显示签名二进制码"
+            /> */}
           <Button
             loading={this.state.loading}
             disabled={this.state.disabled}
@@ -187,7 +190,33 @@ class App extends React.Component {
           >
             {this.state.loading ? '转账中' : '点击转账'}
           </Button>
+          {['TXID','sign','txHex' ].map(key => {
+            return (
+              <TextareaItem
+                title={key}
+                rows={5}
+                value={this.state[key]}
+                id="addrFrom"
+                editable={false}
+                placeholder={key}
+              />
+            )
+          })}
+        </List>
+
+        <WingBlank style={{ marginTop: '15px' }}>
+
         </WingBlank>
+
+        {/* <TextareaItem
+            title="发送结果"
+            rows={5}
+            value={this.state.TXID}
+            editable={false}
+            id="TXID"
+            clear
+            placeholder="这里显示发送结果"
+          /> */}
       </div>
     )
   }
