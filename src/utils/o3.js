@@ -27,6 +27,7 @@ const _sendMessage = function(command, data) {
 const o3 = {
   init: function(callback) {
     callbackHandler = callback
+    console.log(callbackHandler)
     _sendMessage('init')
   },
 
@@ -69,4 +70,6 @@ const o3 = {
     _sendMessage('requestToSign', unsignedRawTransaction)
   }
 }
+window.o3 = o3
+window.o3.VERSION = '0.0.1'
 export default o3
